@@ -3,10 +3,13 @@ const { findByIdFB, findByIdGL, findByToken } = require('../routes/functions')
 
 const admin = async (req, res, next) => {
 
-  console.log("Ingreso en admin.js ........................ ")
+  console.log(req.body);
+  if (!req.body.token) {console.log("No llegó el token a ADMIN"); return null}
+  const token = req.body.token.split('=')[1]
+  console.log(token)
 
   if (req.cookies.facebook=="true") {
-    console.log("Ingreso en admin.js 1,", req.cookies.fbAccessToken)
+    console.log("Ingreso en auth,", req.cookies.fbAccessToken)
     
     try {
       let fbAccessTokenCookie = req.cookies.fbAccessToken
@@ -14,7 +17,7 @@ const admin = async (req, res, next) => {
       const user = findByIdFB(req.cookies.facebookID)
       if (!user) return res.json({isAuth: false, error: true})
 
-      if (user.fbAccessToken === fbAccessTokenCookie && user.isAdmin==true) {
+      if (user.fbAccessToken === fbAccessTokenCookie && user.role==1) {
         req.fbAccessToken = fbAccessTokenCookie
         req.user = user
         next()
@@ -45,7 +48,7 @@ const admin = async (req, res, next) => {
       const user = await findByIdGL(req.cookies.googleID)
       if (!user) return res.json({isAuth:false, error:true})
     
-      if (user.glAccessToken === glAccessTokenCookie && user.isAdmin==true) {
+      if (user.glAccessToken === glAccessTokenCookie && user.role==1) {
         req.glAccessToken = glAccessTokenCookie
         req.user = user
         next()
@@ -67,15 +70,12 @@ const admin = async (req, res, next) => {
   }
 
   if (req.cookies.google!="true" && req.cookies.facebook!="true") {
-    console.log("Ingreso en admin.js 3,", req.cookies.w_auth)
-    let token = req.cookies.w_auth
+    console.log("Ingreso en admin.js 3")
     const user = await findByToken(token)
-    if (!user)
-      return res
-        .cookie("w_auth", "")
-        .json({isAuth:false, error:true})
- 
-    if (user.isAdmin==false) return res.json({isAuth:false, error:true})
+    if (!user) return res.json({isAuth:false, error:true})
+    console.log(user.role==1);
+    if(user.role!=1) return null
+    req.user = user
     next()
   }
 }

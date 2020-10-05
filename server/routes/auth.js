@@ -1,8 +1,9 @@
-const { findByIdFB, findByIdGL, findByToken } = require('../routes/functions')
+const { findByIdFB, findByIdGL, findByToken } = require('./functions')
 
 
 let auth = async (req, res, next) => {
 
+  if (!req.body.token) {console.log("No llegó el token a AUTH"); return null}
   const token = req.body.token.split('=')[1]
   console.log(token)
 

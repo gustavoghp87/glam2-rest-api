@@ -1,13 +1,13 @@
 const express = require('express')
 const router = express.Router()
-const { auth } = require("../middleware/auth")
-//const { admin } = require("../middleware/admin")
-const { User } = require("../models/User")
+const { auth } = require('./auth')
+const { admin } = require('./admin')
+const { User } = require('../models/User')
 const { Product } = require('../models/Product')
-const { Payment } = require("../models/Payment")
-const { Notification } = require("../models/Notification")
+const { Payment } = require('../models/Payment')
+const { Notification } = require('../models/Notification')
 const mercadopago = require('mercadopago')
-const { findByEmail, comparePassword, generateToken, findByToken } = require('./functions')
+const { findByEmail, comparePassword, generateToken } = require('./functions')
 
 require('dotenv').config()
 const access_token = process.env.access_token
@@ -67,7 +67,7 @@ router.post("/auth", auth, async (req, res) => {
             history: req.user.history
         }
     }
-    console.log(pack);
+    console.log("Autenticado", req.user.email);
     res.status(200).json(pack)
 })
 
@@ -104,28 +104,22 @@ router.post("/login", async (req, res) => {
 })
 
 
-router.get("/logout", auth, (req, res) => {
+router.post("/logout", auth, (req, res) => {
     User.findOneAndUpdate({_id:req.user._id},
         {token:"", tokenExp:"", fbAccessToken:"", fbTokenExp:"", glAccessToken:"", glTokenExp:""},
         (err, doc) => {
             if (err) return res.json({ success: false, err })
             console.log("..............................................       Logout exitoso")
-            return res
-                .cookie("fbAccessToken", "")
-                .cookie("glAccessToken", "")
-                .cookie("facebook", "false")
-                .cookie("google", "false")
-                .cookie("w_auth", "")
-                .status(200)
-                .send({success:true})
-        })
+            return res.status(200).send({success:true})
+        }
+    )
 })
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-router.get('/addToCart', auth, async (req, res) => {
+router.post('/addToCart', auth, async (req, res) => {
 
     console.log("Agregando a carrito")
     console.log("Usuario que solicita:", req.user)
@@ -178,7 +172,7 @@ router.get('/addToCart', auth, async (req, res) => {
     })
 })
 
-router.get('/addEnvio', auth, async (req, res) => {
+router.post('/addEnvio', auth, async (req, res) => {
 
     let money = req.query.money;
 
@@ -217,7 +211,7 @@ router.get('/addEnvio', auth, async (req, res) => {
 })
 
 
-router.get('/subtractOneToCart', auth, async (req, res, next) => {
+router.post('/subtractOneToCart', auth, async (req, res, next) => {
 
     const usuario = await User.findOne({ _id: req.user._id })
 
@@ -259,7 +253,7 @@ router.get('/subtractOneToCart', auth, async (req, res, next) => {
 })
 
 
-router.get('/removeFromCart', auth, async (req, res) => {
+router.post('/removeFromCart', auth, async (req, res) => {
 
     console.log(req.user._id, "=", req.query._id)
 
@@ -289,7 +283,7 @@ router.get('/removeFromCart', auth, async (req, res) => {
 });
 
 
-router.get('/userCartInfo', auth, (req, res) => {
+router.post('/userCartInfo', auth, (req, res) => {
     User.findOne(
         { _id: req.user._id },
         (err, userInfo) => {
@@ -311,7 +305,7 @@ router.get('/userCartInfo', auth, (req, res) => {
 })
 
 
-router.get('/getHistory', auth, (req, res) => {
+router.post('/getHistory', auth, (req, res) => {
     console.log("GET HISTORY")
     User.findOne(
         { _id: req.user._id },
@@ -324,17 +318,8 @@ router.get('/getHistory', auth, (req, res) => {
 })
 
 
-router.get('/getSales', auth, async (req, res, next) => {
-    let isAdmin = false
-    if (req.user.role==1) {isAdmin=true}
-    console.log("Es Admin?", isAdmin)
-
-    if (isAdmin) {
-        next()
-    }
-})
-
-router.get('/getSales', async (req, res) => {
+router.post('/getSales', admin, async (_, res) => {
+    console.log("get sales");
     const pagos = await Payment.find().sort({createdAt:-1})
     return res.status(200).json({pagos})
 })

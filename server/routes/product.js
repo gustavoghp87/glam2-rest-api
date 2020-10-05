@@ -3,16 +3,16 @@ const router = express.Router();
 const { Product } = require("../models/Product");
 const multer = require('multer');
 //const { auth } = require("../middleware/auth");
-const { admin } = require("../middleware/admin");
+const { admin } = require("./admin");
 const { User } = require('../models/User');
 
 
 var storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, 'uploads/')               // hardcoredeado
+        cb(null, 'uploads/')
     },
     filename: (req, file, cb) => {
-        cb(null, `${Date.now()}_${file.originalname}`)              // hardcoredeado
+        cb(null, `${Date.now()}_${file.originalname}`)
     },
     fileFilter: (req, file, cb) => {
         const ext = path.extname(file.originalname)
@@ -23,24 +23,17 @@ var storage = multer.diskStorage({
     }
 })
 
-var upload = multer({ storage: storage }).single("file")
+var upload = multer({ storage }).single("file")
 
 
-//=================================
-//             Product
-//=================================
 
-router.post("/uploadImage", admin, (req, res) => {
-
+router.post("/uploadImage", (req, res) => {
     upload(req, res, err => {
-        if (err) {
-            return res.json({ success: false, err })
-        }
+        if (err) return res.json({ success: false, err })
         image = res.req.file.path.slice(8);
         return res.json({ success: true, image: image, fileName: res.req.file.filename })
     })
-
-});
+})
 
 
 router.post("/uploadProduct", admin, (req, res) => {
@@ -54,18 +47,18 @@ router.post("/uploadProduct", admin, (req, res) => {
         return res.status(200).json({ success: true })
     })
 
-});
+})
 
 
 router.post("/getProducts", (req, res) => {
 
-    let order = req.body.order ? req.body.order : "desc";
-    let sortBy = req.body.sortBy ? req.body.sortBy : "_id";
-    let limit = req.body.limit ? parseInt(req.body.limit) : 100;
-    let skip = parseInt(req.body.skip);
+    let order = req.body.order ? req.body.order : "desc"
+    let sortBy = req.body.sortBy ? req.body.sortBy : "_id"
+    let limit = req.body.limit ? parseInt(req.body.limit) : 100
+    let skip = parseInt(req.body.skip)
 
-    let findArgs = {};
-    let term = req.body.searchTerm;
+    let findArgs = {}
+    let term = req.body.searchTerm
 
     for (let key in req.body.filters) {
 
@@ -116,7 +109,7 @@ router.post("/getProducts", (req, res) => {
             })
     }
 
-});
+})
 
 
 //?id=${productId}&type=single
@@ -145,12 +138,11 @@ router.get("/products_by_id", (req, res) => {
         .exec((err, product) => {
             if (err) return res.status(400).send(err)
             return res.status(200).send(product)
-        })
-        
-});
+        }) 
+})
 
 
-router.get('/deleteProduct', admin, async (req, res) => {
+router.post('/deleteProduct', admin, async (req, res) => {
     productId = req.query._id;
     console.log("A REMOVER: ", productId)
 
@@ -172,9 +164,8 @@ router.get('/deleteProduct', admin, async (req, res) => {
                 if (err) { console.log(err) }
                 return console.log("ok borrado de un carrito");
             }
-        );
-    });
-
+        )
+    })
 
 
     Product.updateOne({_id:productId}, {eliminado:true}, (err, info) => {
@@ -182,14 +173,14 @@ router.get('/deleteProduct', admin, async (req, res) => {
         res.json({remove:true})
     })
 
-});
+})
 
 
 router.post('/editProduct', admin, (req, res) => {
     //console.log("A EDITAR: ", req.query)
-    productId = req.query;
+    productId = req.query
     console.log(req.body)
-    const {title, description, price, types} = req.body;
+    const {title, description, price, types} = req.body
 
     //console.log(title, description, price, types)
 
@@ -197,9 +188,9 @@ router.post('/editProduct', admin, (req, res) => {
         console.log(info)
         if (err) res.json({edited:false})
         res.json({edited:true})
-    });
+    })
 
-});
+})
 
 
-module.exports = router;
+module.exports = router
