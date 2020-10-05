@@ -3,7 +3,7 @@ const { findByIdFB, findByIdGL, findByToken } = require('../routes/functions')
 
 const admin = async (req, res, next) => {
 
-  console.log(req.body);
+  console.log(req.body)
   if (!req.body.token) {console.log("No llegó el token a ADMIN"); return null}
   const token = req.body.token.split('token=')[1].split(' ')[0]
   console.log(token)
