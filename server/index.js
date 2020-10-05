@@ -22,7 +22,7 @@ const access_token = process.env.access_token
 mercadopago.configure({access_token})
 
 app.all('/', function(_, res, next) {
-  res.header({"Access-Control-Allow-Origin":true})
+  res.header({"Access-Control-Allow-Origin":false})
   res.header("Access-Control-Allow-Headers", "X-Requested-With")
   next()
 })
