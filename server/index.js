@@ -21,6 +21,12 @@ app.use(morgan('dev'))
 const access_token = process.env.access_token
 mercadopago.configure({access_token})
 
+app.all('/', function(_, res, next) {
+  res.header({"Access-Control-Allow-Origin":true})
+  res.header("Access-Control-Allow-Headers", "X-Requested-With")
+  next()
+})
+
 app.use('/api/users', require('./routes/users'))
 app.use('/api/product', require('./routes/product'))
 app.use('/uploads', express.static(path.resolve(__dirname, '..', 'uploads')))
