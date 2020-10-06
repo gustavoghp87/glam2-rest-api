@@ -2,8 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { Product } = require("../models/Product");
 const multer = require('multer');
-//const { auth } = require("../middleware/auth");
-const { admin } = require("./admin");
+const { admin } = require("./auth");
 const { User } = require('../models/User');
 
 

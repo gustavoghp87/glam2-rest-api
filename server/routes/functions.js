@@ -10,8 +10,11 @@ const findByEmail = async (email) => {
 }
 
 const findByToken = async (token) => {
-    const user = await User.findOne({token})
+    let user = await User.findOne({token})
+    if (!user) user = await User.findOne({fbAccessToken:token})
+    if (!user) user = await User.findOne({glAccessToken:token})
     if (!user) return null
+    console.log("Encontrado usuario por token", user.email);
     return user
     
     // const verif = await jwt.verify(token, 'secret')

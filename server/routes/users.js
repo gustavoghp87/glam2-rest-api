@@ -1,7 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const { auth } = require('./auth')
-const { admin } = require('./admin')
+const { auth, admin } = require('./auth')
 const { User } = require('../models/User')
 const { Product } = require('../models/Product')
 const { Payment } = require('../models/Payment')
@@ -516,109 +515,85 @@ router.post('/notif', async (req, res) => {
 
 router.post('/login-with-facebook', async (req, res) => {
     console.log("Llegó algo de Facebook,", req.body)
-    const { accessToken, id, name, picture, userID, email, data_access_expiration_time } = req.body;
+    const { accessToken, picture, userID, email, data_access_expiration_time } = req.body;
     const profilePic = picture.data.url;
 
     const fbObj = await fetch(`https://graph.facebook.com/v7.0/me?access_token=${accessToken}&method=get&pretty=0&sdk=joey&supress_http_code=1`);
     const json = await fbObj.json();
-    //console.log("Recibido de Graph:", json)
 
-    //console.log("\nA verificar:", userID, " vs ", json.id)
-
-    if (email===undefined) {
+    if (!email) {
         console.log("NO SE PUDO RECUPERAR EL EMAIL VÍA FACEBOOK");
-        res.status(200).json({message:"No se pudo obtener la dirección de correo electrónico de Facebook", isEmail: false, verif:false})
-    } else {
-        if (json.id === userID) {
-            console.log("Coincidencia, verificado")
-            const resp = await User.findOne({facebookID: userID});
-            if (resp) {
-                console.log("El usuario ya existe, procediendo a loguear", )
-
-                let facebookID = json.id
-                console.log("Acc token:", accessToken)
-
-                await User.updateOne({facebookID:userID}, {$set: {fbAccessToken: accessToken, fbTokenExp: data_access_expiration_time}})
-
-                res
-                    .cookie("facebook", "true")
-                    .cookie("fbAccessToken", accessToken)
-                    .cookie("fbTokenExp", data_access_expiration_time)
-                    .cookie("facebookID", facebookID)
-                    .status(200)
-                    .json({
-                        verif:true, isEmail:true, newUser:false, fusion:false, loginSuccess:true, correo:email,
-                        userId: resp._id
-                    })
-
-            } else {
-                console.log("Usuario Facebook no existente, comprobando si el email está registrado por otro método...")
-                const X = await User.findOne({email:email})
-                if (X) {
-                    console.log("El usuario ya estaba registrado por otro método, procediendo a unificar cuentas")
-                    const fusion = {
-                        facebook: true,
-                        facebookID: json.id,
-                        fbAccessToken: accessToken,
-                        fbTokenExp: data_access_expiration_time
-                    }
-
-                    await User.updateOne({email:email}, {$set: fusion})
-
-                    console.log("Guardando en db:", fusion)
-    
-                    console.log("Logueando al usuario nuevo...")
-        
-                    let facebookID = json.id
-
-                    res
-                        .cookie("facebook", "true")
-                        .cookie("fbAccessToken", accessToken)
-                        .cookie("fbTokenExp", data_access_expiration_time)
-                        .cookie("facebookID", facebookID)
-                        .status(200)
-                        .json({
-                            verif:true, isEmail:true, newUser:true, fusion:true, loginSuccess: true, correo:email,
-                            userId: nuevo._id
-                        })
-
-                } else {
-                    console.log("CREANDO USUARIO")
-                    const nuevoUsuario = new User({
-                        name: json.name,
-                        lastname:"",
-                        email: email,
-                        image: profilePic,
-                        token: "",
-                        facebook: true,
-                        facebookID: json.id,
-                        fbAccessToken: accessToken,
-                        fbTokenExp: data_access_expiration_time
-                    })
-
-                    let nuevo = await User.create(nuevoUsuario)
-                    console.log("Guardando en db:", nuevoUsuario)
-
-                    let facebookID = json.id
-
-                    res
-                        .cookie("facebook", "true")
-                        .cookie("fbAccessToken", accessToken)
-                        .cookie("fbTokenExp", data_access_expiration_time)
-                        .cookie("facebookID", facebookID)
-                        .status(200)
-                        .json({
-                            verif:true, isEmail:true, newUser:true, fusion:false, loginSuccess: true, correo:email,
-                            userId: nuevo._id
-                        })
-                }
-            }
-        } else {
-            console.log("Falló la verificación")
-            res.json({message:"Falló la verificación", isEmail:true, verif:false})
-        }
+        return res.status(200).json({message:"No se pudo obtener la dirección de correo electrónico de Facebook", isEmail: false, verif:false})
     }
-    console.log("COOKIES:", req.cookie)
+
+    if (json.id != userID) {
+        console.log("Falló la verificación")
+        return res.json({message:"Falló la verificación", isEmail:true, verif:false})
+    }
+
+    console.log("Coincidencia, verificado")
+    const resp = await User.findOne({facebookID: userID})
+
+    if (resp) {
+        console.log("El usuario ya existe, procediendo a loguear", )
+
+        let facebookID = userID
+        console.log("Acc token:", accessToken)
+
+        await User.updateOne({facebookID}, {$set: {fbAccessToken: accessToken, fbTokenExp: data_access_expiration_time}})
+
+        return res.status(200).json({
+            verif:true, isEmail:true, newUser:false, fusion:false, loginSuccess:true, correo:email,
+            userId: resp._id, token:accessToken
+        })
+    }
+
+    console.log("Usuario Facebook no existente, comprobando si el email está registrado por otro método...")
+    const X = await User.findOne({email})
+    if (X) {
+        console.log("El usuario ya estaba registrado por otro método, procediendo a unificar cuentas")
+        const fusion = {
+            facebook: true,
+            facebookID: json.id,
+            fbAccessToken: accessToken,
+            fbTokenExp: data_access_expiration_time
+        }
+
+        await User.updateOne({email:email}, {$set: fusion})
+
+        console.log("Guardando en db:", fusion)
+        console.log("Logueando al usuario nuevo...")
+        let facebookID = json.id
+
+        return res.status(200).json({
+            verif:true, isEmail:true, newUser:true, fusion:true, loginSuccess: true, correo:email,
+            userId: nuevo._id, token:accessToken
+        })
+    }
+        
+    console.log("CREANDO USUARIO")
+    const nuevoUsuario = new User({
+        name: json.name,
+        lastname:"",
+        email: email,
+        image: profilePic,
+        token: "",
+        facebook: true,
+        facebookID: json.id,
+        fbAccessToken: accessToken,
+        fbTokenExp: data_access_expiration_time
+    })
+
+    let nuevo = await User.create(nuevoUsuario)
+    console.log("Guardando en db:", nuevoUsuario)
+
+    let facebookID = json.id
+
+    return res.status(200).json({
+        verif:true, isEmail:true, newUser:true, fusion:false, loginSuccess: true, correo:email,
+        userId:nuevo._id, token:accessToken
+    })
+
 })
 
 
@@ -626,109 +601,78 @@ router.post('/login-with-facebook', async (req, res) => {
 
 router.post('/google', async (req, res) => {
     console.log("Recibido en /google:", req.body)
-    const {googleId, tokenObj, accessToken, profileObj, tokenId} = req.body
+    const { googleID, tokenObj, accessToken, profileObj, tokenId } = req.body
     
     const image = profileObj.imageUrl
     const email = profileObj.email
     const name = profileObj.name
     const expires = tokenObj.expires_at
 
-    console.log("Tenemos:", "1", image, "2", email, "3", name, "4", expires, "5", googleId, "6", accessToken)
+    console.log("Tenemos:", "1", image, "2", email, "3", name, "4", expires, "5", googleID, "6", accessToken)
 
     // VERIFICAR
-    let Verif = false
     const fetchy = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${tokenId}`)
     const consulta = await fetchy.json()
 
-    if (consulta.sub == googleId) { Verif=true; console.log("VERIFICADO") }
-
-    if (email===undefined) {
+    if (!email) {
         console.log("NO SE PUDO RECUPERAR EL EMAIL VÍA GOOGLE")
-        res.status(200).json({message:"No se pudo obtener la dirección de correo electrónico de Facebook", isEmail: false, verif:false})
-    } else {
-        if (Verif) {
-            console.log("Coincidencia, verificado")
-            const resp = await User.findOne({googleID: googleId})
-            if (resp) {
-                console.log("El usuario ya existe, procediendo a loguear")
-
-                await User.updateOne({googleID:googleId}, {$set: {glAccessToken:accessToken, glTokenExp:expires}})
-
-                res
-                    .cookie("google", "true")
-                    .cookie("glAccessToken", accessToken)
-                    .cookie("glTokenExp", expires)
-                    .cookie("googleID", googleId)
-                    .status(200)
-                    .json({
-                        verif:true, isEmail:true, newUser:false, fusion:false, loginSuccess:true, correo:email,
-                        userId: resp._id
-                    })
-
-            } else {
-                console.log("Usuario Google no existente, comprobando si el email está registrado por otro método...")
-                const X = await User.findOne({email:email})
-                if (X) {
-                    console.log("El usuario ya estaba registrado por otro método, procediendo a unificar cuentas")
-                    const fusion = {
-                        google: true,
-                        googleID: googleId,
-                        glAccessToken: accessToken,
-                        glTokenExp: expires
-                    }
-
-                    await User.updateOne({email:email}, {$set: fusion})
-
-                    console.log("Guardando en db:", fusion)
-    
-                    console.log("Logueando al usuario nuevo...")
-
-                    res
-                        .cookie("google", "true")
-                        .cookie("glAccessToken", accessToken)
-                        .cookie("glTokenExp", expires)
-                        .cookie("googleID", googleId)
-                        .status(200)
-                        .json({
-                            verif:true, isEmail:true, newUser:true, fusion:true, loginSuccess: true, correo:email,
-                            userId: nuevo._id
-                        })
-
-                } else {
-                    console.log("CREANDO USUARIO")
-                    const nuevoUsuario = new User({
-                        name: name,
-                        lastname:"",
-                        email: email,
-                        image: image,
-                        token: "",
-                        google: true,
-                        googleID: googleId,
-                        glAccessToken: accessToken,
-                        glTokenExp: expires
-                    })
-
-                    let nuevo = await User.create(nuevoUsuario)
-                    console.log("Guardando en db:", nuevoUsuario)
-
-                    res
-                        .cookie("google", "true")
-                        .cookie("glAccessToken", accessToken)
-                        .cookie("glTokenExp", expires)
-                        .cookie("googleID", googleId)
-                        .status(200)
-                        .json({
-                            verif:true, isEmail:true, newUser:true, fusion:false, loginSuccess: true, correo:email,
-                            userId: nuevo._id
-                        })
-                }
-            }
-        } else {
-            console.log("Falló la verificación")
-            res.json({message:"Falló la verificación", isEmail:true, verif:false})
-        }
+        return res.status(200).json({message:"No se pudo obtener la dirección de correo electrónico de Facebook", isEmail: false, verif:false})
     }
-    console.log("COOKIES:", req.cookies)
+
+    if (consulta.sub != googleID) { console.log("Falló verificación"); return res.status(200).json({message:"Falló la verificación por Google", isEmail: true, verif:false}) }
+
+    console.log("Coincidencia, verificado")
+    const userById = await User.findOne({googleID})
+
+    if (userById) {
+        console.log("El usuario ya existe, procediendo a loguear")
+        await User.updateOne({googleID}, {$set: {glAccessToken:accessToken, glTokenExp:expires}})
+
+        return res.status(200).json({
+            verif:true, isEmail:true, newUser:false, fusion:false, loginSuccess:true, correo:email,
+            userId:resp._id, token:accessToken
+        })
+    }
+
+    console.log("Usuario Google no existente, comprobando si el email está registrado por otro método...")
+    const userByEmail = await User.findOne({email:email})
+    if (userByEmail) {
+        console.log("El usuario ya estaba registrado por otro método, procediendo a unificar cuentas")
+        const fusion = {
+            google: true,
+            googleID: googleID,
+            glAccessToken: accessToken,
+            glTokenExp: expires
+        }
+        await User.updateOne({email:email}, {$set: fusion})
+        console.log("Guardando en db:", fusion)
+
+        return res.status(200).json({
+            verif:true, isEmail:true, newUser:true, fusion:true, loginSuccess: true, correo:email,
+            userId:nuevo._id, token:accessToken
+        })
+    }
+
+    console.log("CREANDO USUARIO")
+    const nuevoUsuario = new User({
+        name: name,
+        lastname:"",
+        email: email,
+        image: image,
+        token: "",
+        google: true,
+        googleID: googleID,
+        glAccessToken: accessToken,
+        glTokenExp: expires
+    })
+
+    let nuevo = await User.create(nuevoUsuario)
+    console.log("Guardando en db:", nuevoUsuario)
+
+    return res.status(200).json({
+        verif:true, isEmail:true, newUser:true, fusion:false, loginSuccess: true, correo:email,
+        userId:nuevo._id, token:accessToken
+    })
 })
 
 
