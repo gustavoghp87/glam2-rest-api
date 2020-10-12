@@ -8,22 +8,28 @@ const { Notification } = require('../models/Notification')
 const mercadopago = require('mercadopago')
 const { findByEmail, comparePassword, generateToken } = require('./functions')
 const cors = require('cors')
-
-
 require('dotenv').config()
 const access_token = process.env.access_token
 const fetch = require('node-fetch')
 const mongoose = require('mongoose')
 
+
 const USER_SERVER = "https://glam2-rest-api.herokuapp.com/api/users"
 // para activar pago recibido luego de las notificaciones de MP
-const SERVER = "https://glam2-rest-api.herokuapp.com"
-// para recibir las notificaciones de MP
+
+const whitelist = ['http://localhost:3000', 'https://glamstudio.com.ar', 'https://glamstudio.com.ar/login', 'https://glamstudio.com.ar/user/cart']
+
+const corsOptions = {
+    'Access-Control-Allow-Credentials': true,
+    origin: (origin, callback) => {
+        if(whitelist.indexOf(origin) !== -1) callback(null, true)
+        else callback(new Error('Not allowed by CORS'))
+    }
+}
+console.log(corsOptions);
 
 
-router.use(cors())
-
-router.post("/auth", auth, async (req, res) => {
+router.post("/auth", cors(corsOptions), auth, async (req, res) => {
 
     const pack = {
         _id: req.user._id,
@@ -43,7 +49,7 @@ router.post("/auth", auth, async (req, res) => {
 })
 
 
-router.post("/register", (req, res) => {
+router.post("/register", cors(corsOptions), (req, res) => {
 
     const user = new User(req.body)
 
@@ -56,7 +62,7 @@ router.post("/register", (req, res) => {
 })
 
 
-router.post("/login", async (req, res) => {
+router.post("/login", cors(corsOptions), async (req, res) => {
 
     const user = await findByEmail(req.body.email)
     if (!user) return res.json({
@@ -75,7 +81,7 @@ router.post("/login", async (req, res) => {
 })
 
 
-router.post("/logout", auth, (req, res) => {
+router.post("/logout", cors(corsOptions), auth, (req, res) => {
     User.findOneAndUpdate({_id:req.user._id},
         {token:"", tokenExp:"", fbAccessToken:"", fbTokenExp:"", glAccessToken:"", glTokenExp:""},
         (err, doc) => {
@@ -90,7 +96,7 @@ router.post("/logout", auth, (req, res) => {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-router.post('/addToCart', auth, async (req, res) => {
+router.post('/addToCart', cors(corsOptions), auth, async (req, res) => {
 
     console.log("Agregando a carrito")
     console.log("Usuario que solicita:", req.user)
@@ -143,7 +149,7 @@ router.post('/addToCart', auth, async (req, res) => {
     })
 })
 
-router.post('/addEnvio', auth, async (req, res) => {
+router.post('/addEnvio', cors(corsOptions), auth, async (req, res) => {
 
     let money = req.query.money;
 
@@ -182,7 +188,7 @@ router.post('/addEnvio', auth, async (req, res) => {
 })
 
 
-router.post('/subtractOneToCart', auth, async (req, res, next) => {
+router.post('/subtractOneToCart', cors(corsOptions), auth, async (req, res, next) => {
 
     const usuario = await User.findOne({ _id: req.user._id })
 
@@ -224,7 +230,7 @@ router.post('/subtractOneToCart', auth, async (req, res, next) => {
 })
 
 
-router.post('/removeFromCart', auth, async (req, res) => {
+router.post('/removeFromCart', cors(corsOptions), auth, async (req, res) => {
 
     console.log(req.user._id, "=", req.query._id)
 
@@ -254,7 +260,7 @@ router.post('/removeFromCart', auth, async (req, res) => {
 });
 
 
-router.post('/userCartInfo', auth, (req, res) => {
+router.post('/userCartInfo', cors(corsOptions), auth, (req, res) => {
     User.findOne(
         { _id: req.user._id },
         (err, userInfo) => {
@@ -276,7 +282,7 @@ router.post('/userCartInfo', auth, (req, res) => {
 })
 
 
-router.post('/getHistory', auth, (req, res) => {
+router.post('/getHistory', cors(corsOptions), auth, (req, res) => {
     console.log("GET HISTORY")
     User.findOne(
         { _id: req.user._id },
@@ -289,14 +295,14 @@ router.post('/getHistory', auth, (req, res) => {
 })
 
 
-router.post('/getSales', admin, async (_, res) => {
+router.post('/getSales', cors(corsOptions), admin, async (_, res) => {
     console.log("get sales");
     const pagos = await Payment.find().sort({createdAt:-1})
     return res.status(200).json({pagos})
 })
 
 
-router.post('/procesar-pago', auth, async (req, res) => {
+router.post('/procesar-pago', cors(corsOptions), auth, async (req, res) => {
 
     console.log("Post procesar pago")
     const items = req.body.items
@@ -368,7 +374,7 @@ router.post('/procesar-pago', auth, async (req, res) => {
 })
 
 
-router.post('/notif', async (req, res) => {
+router.post('/notif', cors(corsOptions), async (req, res) => {
 
     const notificationMP = req.body
     console.log("NOTIFICACIÓN DE MERCADO PAGO", notificationMP)
@@ -485,7 +491,7 @@ router.post('/notif', async (req, res) => {
 ////////////////////////////////////////////////////////////////////////////////////////     FACEBOOK
 
 
-router.post('/login-with-facebook', async (req, res) => {
+router.post('/login-with-facebook', cors(corsOptions), async (req, res) => {
     console.log("Llegó algo de Facebook,", req.body)
     const { accessToken, picture, userID, email, data_access_expiration_time } = req.body;
     const profilePic = picture.data.url;
@@ -571,7 +577,7 @@ router.post('/login-with-facebook', async (req, res) => {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////        GOOGLE
 
-router.post('/google', async (req, res) => {
+router.post('/google', cors(corsOptions), async (req, res) => {
     console.log("Recibido en /google:", req.body)
     const { googleID, tokenObj, accessToken, profileObj, tokenId } = req.body
     
