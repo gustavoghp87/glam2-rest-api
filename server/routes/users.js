@@ -17,12 +17,18 @@ const mongoose = require('mongoose')
 const USER_SERVER = "https://glam2-rest-api.herokuapp.com/api/users"
 // para activar pago recibido luego de las notificaciones de MP
 
-const whitelist = ['http://localhost:3000', 'https://glamstudio.com.ar', 'https://glamstudio.com.ar/login', 'https://glamstudio.com.ar/user/cart']
+const whitelist = [
+    'http://localhost:3000',
+    'https://glamstudio.com.ar',
+    'https://www.glamstudio.com.ar',
+    'https://glamstudio.com.ar/login',
+    'https://glamstudio.com.ar/user/cart'
+]
 
 const corsOptions = {
     'Access-Control-Allow-Credentials': true,
     origin: (origin, callback) => {
-        if(whitelist.indexOf(origin) !== -1) callback(null, true)
+        if (whitelist.indexOf(origin) !== -1) callback(null, true)
         else callback(new Error('Not allowed by CORS'))
     }
 }
