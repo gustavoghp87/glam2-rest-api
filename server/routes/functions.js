@@ -34,6 +34,7 @@ const comparePassword = async (plainPassword, password) => {
 }
 
 const generateToken = async (_id) => {
+    console.log("por generar y guardar token nuevo");
     let token = jwt.sign(_id.toHexString(), 'secret')
     //let oneHour = moment().add(1000000, 'hour').valueOf()
     //user.tokenExp = oneHour
@@ -41,7 +42,7 @@ const generateToken = async (_id) => {
     return token
 }
 
-const findByTokenFB = async () => {
+const findByTokenFB = async (fbAccessToken) => {
     const user = await User.findOne({fbAccessToken})
     if (!user) return null
     return user

@@ -21,51 +21,19 @@ const SERVER = "https://glam2-rest-api.herokuapp.com"
 
 router.post("/auth", auth, async (req, res) => {
 
-    let pack = {}
-
-    if (req.cookies.facebook=="true") {
-        const user = await findByTokenFB(req.cookies.fbAccessToken)
-        if (!user) return null
-        pack = {
-            _id: user._id,
-            isAdmin: user.role === 0 ? false : true,
-            isAuth: true,
-            email: user.email,
-            name: user.name,
-            lastname: user.lastname,
-            role: user.role,
-            image: user.image,
-            cart: user.cart,
-            history: user.history
-        }
-    } else if (req.cookies.google=="true") {
-        const user = await findByTokenGL(req.cookies.glAccessToken)
-        pack = {
-            _id: user._id,
-            isAdmin: user.role === 0 ? false : true,
-            isAuth: true,
-            email: user.email,
-            name: user.name,
-            lastname: user.lastname,
-            role: user.role,
-            image: user.image,
-            cart: user.cart,
-            history: user.history
-        }
-    } else {
-        pack = {
-            _id: req.user._id,
-            isAdmin: req.user.role === 0 ? false : true,
-            isAuth: true,
-            email: req.user.email,
-            name: req.user.name,
-            lastname: req.user.lastname,
-            role: req.user.role,
-            image: req.user.image,
-            cart: req.user.cart,
-            history: req.user.history
-        }
+    const pack = {
+        _id: req.user._id,
+        isAdmin: req.user.role === 0 ? false : true,
+        isAuth: true,
+        email: req.user.email,
+        name: req.user.name,
+        lastname: req.user.lastname,
+        role: req.user.role,
+        image: req.user.image,
+        cart: req.user.cart,
+        history: req.user.history
     }
+
     console.log("Autenticado", req.user.email);
     res.status(200).json(pack)
 })
@@ -94,7 +62,7 @@ router.post("/login", async (req, res) => {
 
     const compare = await comparePassword(req.body.password, user.password)
     if (!compare) return res.json({loginSuccess:false, message:"Contraseña mal escrita"})
-
+    
     const token = await generateToken(user._id)
     if (!token) return res.json({loginSuccess:false})
 

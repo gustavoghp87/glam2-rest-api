@@ -95,7 +95,6 @@ router.post("/getProducts", (req, res) => {
                 res.status(200).json({ success: true, products, postSize: products.length })
             })
     } else {
-        console.log("aca")
         Product.find(findArgs)
             .find( {$and: [{eliminado:false}, {envio:false} ]})
             .populate("writer")
