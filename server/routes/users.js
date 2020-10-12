@@ -22,7 +22,8 @@ const whitelist = [
     'https://glamstudio.com.ar',
     'https://www.glamstudio.com.ar',
     'https://glamstudio.com.ar/login',
-    'https://glamstudio.com.ar/user/cart'
+    'https://glamstudio.com.ar/user/cart',
+    'https://www.glamstudio.com.ar/login'
 ]
 
 const corsOptions = {
@@ -32,8 +33,6 @@ const corsOptions = {
         else callback(new Error('Not allowed by CORS'))
     }
 }
-console.log(corsOptions);
-
 
 router.post("/auth", cors(corsOptions), auth, async (req, res) => {
 
