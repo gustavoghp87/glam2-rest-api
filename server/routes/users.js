@@ -7,6 +7,8 @@ const { Payment } = require('../models/Payment')
 const { Notification } = require('../models/Notification')
 const mercadopago = require('mercadopago')
 const { findByEmail, comparePassword, generateToken } = require('./functions')
+const cors = require('cors')
+
 
 require('dotenv').config()
 const access_token = process.env.access_token
@@ -18,6 +20,8 @@ const USER_SERVER = "https://glam2-rest-api.herokuapp.com/api/users"
 const SERVER = "https://glam2-rest-api.herokuapp.com"
 // para recibir las notificaciones de MP
 
+
+router.use(cors())
 
 router.post("/auth", auth, async (req, res) => {
 
