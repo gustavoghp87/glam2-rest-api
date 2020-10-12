@@ -23,14 +23,23 @@ const whitelist = [
     'https://www.glamstudio.com.ar',
     'https://glamstudio.com.ar/login',
     'https://glamstudio.com.ar/user/cart',
-    'https://www.glamstudio.com.ar/login'
+    'https://www.glamstudio.com.ar/login',
+    'https://glam2-rest-api.herokuapp.com/api/users/auth'
 ]
+
+
 
 const corsOptions = {
     'Access-Control-Allow-Credentials': true,
     origin: (origin, callback) => {
-        if (whitelist.indexOf(origin) !== -1) callback(null, true)
-        else callback(new Error('Not allowed by CORS'))
+        if (whitelist.indexOf(origin) !== -1){
+            callback(null, true)
+            console.log("viendo", whitelist.indexOf(origin), whitelist, origin)
+        }
+        else {
+            console.log("viendo", whitelist.indexOf(origin), whitelist, origin)
+            callback(new Error('Not allowed by CORS'))
+        }
     }
 }
 
