@@ -568,14 +568,14 @@ router.post('/login-with-facebook', async (req, res) => {
 
 router.post('/google', async (req, res) => {
     console.log("Recibido en /google:", req.body)
-    const { googleID, tokenObj, accessToken, profileObj, tokenId } = req.body
+    const { googleId, tokenObj, accessToken, profileObj, tokenId } = req.body
     
     const image = profileObj.imageUrl
     const email = profileObj.email
     const name = profileObj.name
     const expires = tokenObj.expires_at
 
-    console.log("Tenemos:", "1", image, "2", email, "3", name, "4", expires, "5", googleID, "6", accessToken)
+    console.log("Tenemos:", "1", image, "2", email, "3", name, "4", expires, "5", googleId, "6", accessToken)
 
     // VERIFICAR
     const fetchy = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${tokenId}`)
@@ -586,14 +586,14 @@ router.post('/google', async (req, res) => {
         return res.status(200).json({message:"No se pudo obtener la dirección de correo electrónico de Facebook", isEmail: false, verif:false})
     }
 
-    if (consulta.sub != googleID) { console.log("Falló verificación"); return res.status(200).json({message:"Falló la verificación por Google", isEmail: true, verif:false}) }
+    if (consulta.sub != googleId) { console.log("Falló verificación"); return res.status(200).json({message:"Falló la verificación por Google", isEmail: true, verif:false}) }
 
     console.log("Coincidencia, verificado")
-    const userById = await User.findOne({googleID})
+    const userById = await User.findOne({googleId})
 
     if (userById) {
         console.log("El usuario ya existe, procediendo a loguear")
-        await User.updateOne({googleID}, {$set: {glAccessToken:accessToken, glTokenExp:expires}})
+        await User.updateOne({googleId}, {$set: {glAccessToken:accessToken, glTokenExp:expires}})
 
         return res.status(200).json({
             verif:true, isEmail:true, newUser:false, fusion:false, loginSuccess:true, correo:email,
@@ -607,7 +607,7 @@ router.post('/google', async (req, res) => {
         console.log("El usuario ya estaba registrado por otro método, procediendo a unificar cuentas")
         const fusion = {
             google: true,
-            googleID: googleID,
+            googleId,
             glAccessToken: accessToken,
             glTokenExp: expires
         }
@@ -628,7 +628,7 @@ router.post('/google', async (req, res) => {
         image: image,
         token: "",
         google: true,
-        googleID: googleID,
+        googleId,
         glAccessToken: accessToken,
         glTokenExp: expires
     })
