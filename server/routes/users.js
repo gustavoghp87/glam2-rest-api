@@ -7,6 +7,7 @@ const { Payment } = require('../models/Payment')
 const { Notification } = require('../models/Notification')
 const mercadopago = require('mercadopago')
 const { findByEmail, comparePassword, generateToken } = require('./functions')
+const cors = require('cors')
 
 require('dotenv').config()
 const access_token = process.env.access_token
@@ -290,7 +291,7 @@ router.post('/getSales', admin, async (_, res) => {
 })
 
 
-router.post('/procesar-pago', auth, async (req, res) => {
+router.post('/procesar-pago', cors(), auth, async (req, res) => {
 
     console.log("Post procesar pago")
     const items = req.body.items
