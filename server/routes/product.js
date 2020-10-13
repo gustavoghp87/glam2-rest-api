@@ -7,28 +7,36 @@ const { User } = require('../models/User')
 const cors = require('cors')
 
 
-const whitelist = [
-    'http://localhost:3000',
-    'https://glamstudio.com.ar',
-    'https://www.glamstudio.com.ar',
-    'https://glamstudio.com.ar/login',
-    'https://glamstudio.com.ar/user/cart',
-    'https://www.glamstudio.com.ar/login'
-]
+// const whitelist = [
+//     'http://localhost:3000',
+//     'https://glamstudio.com.ar',
+//     'https://www.glamstudio.com.ar',
+//     'https://glamstudio.com.ar/login',
+//     'https://glamstudio.com.ar/user/cart',
+//     'https://www.glamstudio.com.ar/login'
+// ]
 
-const corsOptions = {
-    'Access-Control-Allow-Credentials': true,
-    origin: (origin, callback) => {
-        if (whitelist.indexOf(origin) !== -1) {
-            console.log("cors", origin, whitelist)
-            callback(null, true)
-        }
-        else {
-            console.log("cors", origin, whitelist)
-            callback(null, true)
-        }
-    }
-}
+// const issue2options = {
+//     'Access-Control-Allow-Credentials': true,
+//     origin: (origin, callback) => {
+//         if (whitelist.indexOf(origin) !== -1) {
+//             console.log("cors", origin, whitelist)
+//             callback(null, true)
+//         }
+//         else {
+//             console.log("cors", origin, whitelist)
+//             callback(null, true)
+//         }
+//     }
+// }
+
+const issue2options = {
+    origin: true,
+    methods: ["POST"],
+    credentials: true,
+    maxAge: 3600
+  }
+router.options("/getProducts", cors(issue2options))
 
 
 var storage = multer.diskStorage({
@@ -51,7 +59,7 @@ var upload = multer({ storage }).single("file")
 
 
 
-router.post("/uploadImage", cors(corsOptions), (req, res) => {
+router.post("/uploadImage", cors(issue2options), (req, res) => {
     upload(req, res, err => {
         if (err) return res.json({ success: false, err })
         image = res.req.file.path.slice(8);
@@ -60,7 +68,7 @@ router.post("/uploadImage", cors(corsOptions), (req, res) => {
 })
 
 
-router.post("/uploadProduct", cors(corsOptions), admin, (req, res) => {
+router.post("/uploadProduct", cors(issue2options), admin, (req, res) => {
 
     //save all the data we got from the client into the DB
     console.log("Creando producto,", req.body)
@@ -74,7 +82,7 @@ router.post("/uploadProduct", cors(corsOptions), admin, (req, res) => {
 })
 
 
-router.post("/getProducts", cors(corsOptions), (req, res) => {
+router.post("/getProducts", cors(issue2options), (req, res) => {
 
     let order = req.body.order ? req.body.order : "desc"
     let sortBy = req.body.sortBy ? req.body.sortBy : "_id"
@@ -139,7 +147,7 @@ router.post("/getProducts", cors(corsOptions), (req, res) => {
 //id=12121212,121212,1212121   type=array 
 
 
-router.get("/products_by_id", cors(corsOptions), (req, res) => {
+router.get("/products_by_id", cors(issue2options), (req, res) => {
     let type = req.query.type
     let productIds = req.query.id
 
@@ -165,7 +173,7 @@ router.get("/products_by_id", cors(corsOptions), (req, res) => {
 })
 
 
-router.post('/deleteProduct', cors(corsOptions), admin, async (req, res) => {
+router.post('/deleteProduct', cors(issue2options), admin, async (req, res) => {
     productId = req.query._id;
     console.log("A REMOVER: ", productId)
 
@@ -199,7 +207,7 @@ router.post('/deleteProduct', cors(corsOptions), admin, async (req, res) => {
 })
 
 
-router.post('/editProduct', cors(corsOptions), admin, (req, res) => {
+router.post('/editProduct', cors(issue2options), admin, (req, res) => {
     //console.log("A EDITAR: ", req.query)
     productId = req.query
     console.log(req.body)
