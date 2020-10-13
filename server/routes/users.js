@@ -569,7 +569,7 @@ router.post('/login-with-facebook', async (req, res) => {
 router.post('/google', async (req, res) => {
     console.log("Recibido en /google:", req.body)
     const { googleId, tokenObj, accessToken, profileObj, tokenId } = req.body
-    
+
     const image = profileObj.imageUrl
     const email = profileObj.email
     const name = profileObj.name
