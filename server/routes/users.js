@@ -611,12 +611,12 @@ router.post('/google', async (req, res) => {
             glAccessToken: accessToken,
             glTokenExp: expires
         }
-        await User.updateOne({email:email}, {$set: fusion})
+        await User.updateOne({email}, {$set: fusion})
         console.log("Guardando en db:", fusion)
 
         return res.status(200).json({
             verif:true, isEmail:true, newUser:true, fusion:true, loginSuccess: true, correo:email,
-            userId:nuevo._id, token:accessToken
+            token:accessToken
         })
     }
 
@@ -638,7 +638,7 @@ router.post('/google', async (req, res) => {
 
     return res.status(200).json({
         verif:true, isEmail:true, newUser:true, fusion:false, loginSuccess: true, correo:email,
-        userId:nuevo._id, token:accessToken
+        token:accessToken
     })
 })
 
