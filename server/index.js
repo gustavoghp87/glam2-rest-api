@@ -11,7 +11,7 @@ const DB_CONECTION = process.env.DB_CONECTION
 const connectDB = require('./config/database')
 connectDB(DB_CONECTION)
 
-//app.use(cors())
+app.use(cors())
 app.use(bodyParser.urlencoded({extended:true}))
 app.use(bodyParser.json())
 app.use(cookieParser())
