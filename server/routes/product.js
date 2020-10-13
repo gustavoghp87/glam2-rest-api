@@ -19,8 +19,14 @@ const whitelist = [
 const corsOptions = {
     'Access-Control-Allow-Credentials': true,
     origin: (origin, callback) => {
-        if (whitelist.indexOf(origin) !== -1) callback(null, true)
-        else callback(new Error('Not allowed by CORS'))
+        if (whitelist.indexOf(origin) !== -1) {
+            console.log("cors", origin, whitelist)
+            callback(null, true)
+        }
+        else {
+            console.log("cors", origin, whitelist)
+            callback(null, true)
+        }
     }
 }
 

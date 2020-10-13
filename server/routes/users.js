@@ -27,23 +27,21 @@ const whitelist = [
     'https://glam2-rest-api.herokuapp.com/api/users/auth'
 ]
 
-
-
 const corsOptions = {
     'Access-Control-Allow-Credentials': true,
     origin: (origin, callback) => {
-        if (whitelist.indexOf(origin) !== -1){
+        if (whitelist.indexOf(origin) !== -1) {
+            console.log("cors", origin, whitelist)
             callback(null, true)
-            console.log("viendo", whitelist.indexOf(origin), whitelist, origin)
         }
         else {
-            console.log("viendo", whitelist.indexOf(origin), whitelist, origin)
-            callback(new Error('Not allowed by CORS'))
+            console.log("cors", origin, whitelist)
+            callback(null, true)
         }
     }
 }
 
-router.post("/auth", cors(corsOptions), auth, async (req, res) => {
+router.post("/auth", auth, cors(corsOptions), async (req, res) => {
 
     const pack = {
         _id: req.user._id,
