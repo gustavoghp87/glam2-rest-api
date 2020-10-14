@@ -634,7 +634,7 @@ router.post('/google', async (req, res) => {
     })
 
     let nuevo = await User.create(nuevoUsuario)
-    console.log("Guardando en db:", nuevoUsuario)
+    console.log("Guardando en db:", nuevo)
 
     return res.status(200).json({
         verif:true, isEmail:true, newUser:true, fusion:false, loginSuccess: true, correo:email,

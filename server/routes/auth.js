@@ -1,30 +1,43 @@
 const { findByToken } = require('./functions')
 
 
-const auth = async (req, res, next) => {
+const auth = (req, res, next) => {
   console.log(req.body)
   if (!req.body.token) {console.log("No llegó el token a AUTH"); return null}
-  let token = req.body.token.split('token=')[1].split(';')[0]
+  let tokens = req.body.token.split('token=')
+  console.log(tokens)
 
-  console.log("Ingreso en auth", token)
-  const user = await findByToken(token)
-  if (!user) return res.json({isAuth:false, error:true})
-  req.user = user
-  console.log("Autenticado", user);
-  next()
+  tokens.forEach(async token => {
+    token = token.split(';')
+    console.log("Ingreso en auth", token)
+    const user = await findByToken(token)
+    if (user) {
+      req.user = user
+      console.log("Autenticado", user.email)
+      return next()
+    }
+  })
+
+  //return res.json({isAuth:false, error:true})
 }
 
 const admin = async (req, res, next) => {
   console.log(req.body)
   if (!req.body.token) {console.log("No llegó el token a AUTH"); return null}
-  let token = req.body.token.split('token=')[1].split(';')[0]
+  let tokens = req.body.token.split('token=')
+  console.log(tokens)
 
-  console.log("Ingreso en admin", token)
-  const user = await findByToken(token)
-  if (!user) return res.json({isAuth:false, error:true})
-  if (user.role!=1) return null
-  req.user = user
-  next()
+  tokens.forEach(async token => {
+    token = token.split(';')
+    console.log("Ingreso en admin", token)
+    const user = await findByToken(token)
+    if (user && user.role==1) {
+      req.user = user
+      console.log("Autenticado", user.email)
+      return next()
+    }
+  })
+
 }
 
 

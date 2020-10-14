@@ -1,22 +1,19 @@
 # GlamStudio MakeUp
 
-REST API alojada en [Heroku]
+Restful API alojada en [Heroku] en NodeJS, Express y Mongoose
 
-Aplicación web [glamstudio.com.ar] en ReactJS - Tienda virtual Full Stack MERN
+Para la aplicación web cliente [glam2-client] alojada en [glamstudio.com.ar] - Tienda virtual ReactJS
 
 Con registro, login, oauth de Google y Facebook, carrito, historial de compras.
 
 Para administradores: subida de productos, edición, historial de ventas.
 
-Núcleo tomado de [jaewonhimnae/react-shop-app] y luego completado y personalizado.
+Base de datos clouster de Atlas MongoDB.
 
-Escrita en ReactJS y NodeJS, base de datos clouster de Atlas (MongoDB).
-
-
+Variables de entorno: PORT_BACKEND, DB_CONECTION, access_token (Mercado Pago), ENV
 
 -------------------------------------------------------------------------------------------------
 
-
  [glamstudio.com.ar]: <http://glamstudio.com.ar>
- [jaewonhimnae/react-shop-app]: <https://github.com/jaewonhimnae/react-shop-app>
+ [glam2-client]: <https://github.com/gustavoghp87/glam2-client/>
  [Heroku]: <https://glam-rest-api.herokuapp.com>
