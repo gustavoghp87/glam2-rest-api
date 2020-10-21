@@ -20,6 +20,7 @@ const USER_SERVER = "https://glam2-rest-api.herokuapp.com/api/users"
 
 router.post("/auth", auth, async (req, res) => {
 
+    console.log("en /auth,", req.user)
     let pack
     if (req.user) {
         pack = {
@@ -40,6 +41,7 @@ router.post("/auth", auth, async (req, res) => {
             isAuth: false,
             isAdmin: false
         }
+        console.log("No autenticado 2")
     }
 
     res.status(200).json(pack)
@@ -490,7 +492,7 @@ router.post('/notif', async (req, res) => {
 
 router.post('/login-with-facebook', async (req, res) => {
     console.log("Llegó algo de Facebook,", req.body)
-    const { accessToken, picture, userID, email, data_access_expiration_time } = req.body;
+    const { accessToken, picture, userID, email } = req.body;
     const profilePic = picture.data.url;
 
     const fbObj = await fetch(`https://graph.facebook.com/v7.0/me?access_token=${accessToken}&method=get&pretty=0&sdk=joey&supress_http_code=1`);
@@ -507,15 +509,15 @@ router.post('/login-with-facebook', async (req, res) => {
     }
 
     console.log("Coincidencia, verificado")
-    const resp = await User.findOne({facebookID: userID})
+    const resp = await User.findOne({facebookId: userID})
 
     if (resp) {
         console.log("El usuario ya existe, procediendo a loguear", )
 
-        let facebookID = userID
+        let facebookId = userID
         console.log("Acc token:", accessToken)
 
-        await User.updateOne({facebookID}, {$set: {fbAccessToken: accessToken, fbTokenExp: data_access_expiration_time}})
+        await User.updateOne({facebookId}, {$set: {fbAccessToken: accessToken}})
 
         return res.status(200).json({
             verif:true, isEmail:true, newUser:false, fusion:false, loginSuccess:true, correo:email,
@@ -528,10 +530,8 @@ router.post('/login-with-facebook', async (req, res) => {
     if (X) {
         console.log("El usuario ya estaba registrado por otro método, procediendo a unificar cuentas")
         const fusion = {
-            facebook: true,
-            facebookID: json.id,
+            facebookId: json.id,
             fbAccessToken: accessToken,
-            fbTokenExp: data_access_expiration_time
         }
 
         await User.updateOne({email:email}, {$set: fusion})
@@ -548,14 +548,12 @@ router.post('/login-with-facebook', async (req, res) => {
     console.log("CREANDO USUARIO")
     const nuevoUsuario = new User({
         name: json.name,
-        lastname:"",
-        email: email,
+        lastname: "",
+        email,
         image: profilePic,
         token: "",
-        facebook: true,
-        facebookID: json.id,
+        facebookId: json.id,
         fbAccessToken: accessToken,
-        fbTokenExp: data_access_expiration_time
     })
 
     let nuevo = await User.create(nuevoUsuario)
@@ -594,7 +592,7 @@ router.post('/google', async (req, res) => {
     if (consulta.sub != googleId) { console.log("Falló verificación"); return res.status(200).json({message:"Falló la verificación por Google", isEmail: true, verif:false}) }
 
     console.log("Coincidencia, verificado")
-    const userById = await User.findOne({googleID:googleId})
+    const userById = await User.findOne({googleId})
 
     if (userById) {
         console.log("El usuario ya existe, procediendo a loguear")

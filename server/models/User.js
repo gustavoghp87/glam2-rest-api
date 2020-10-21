@@ -41,11 +41,7 @@ const userSchema = mongoose.Schema({
         type: [],
         default: []
     },
-    facebook: {
-        type: Boolean,
-        default: false
-    },
-    facebookID: {
+    facebookId: {
         type: String,
         default: ""
     },
@@ -53,23 +49,13 @@ const userSchema = mongoose.Schema({
         type: String,
         default: ""
     },
-    fbTokenExp: {
-        type: Number
-    },
-    google: {
-        type: Boolean,
-        default: false
-    },
-    googleID: {
+    googleId: {
         type: String,
         default: ""
     },
     glAccessToken: {
         type: String,
         default: ""
-    },
-    glTokenExp: {
-        type: Number
     }
 })
 
