@@ -13,16 +13,11 @@ const auth = (req, res, next) => {
     const user = await findByToken(token)
     if (user) {
       req.user = user
-      console.log("Autenticado", user.email)
-      next()
+      console.log("Autenticado 1", user.email)
     } else {
-      const pack = {
-        isAdmin: false,
-        isAuth: false
-      }
       console.log("No autenticado")
-      return res.status(200).json(pack)
     }
+    next()
   })
 
   //return res.json({isAuth:false, error:true})

@@ -20,20 +20,28 @@ const USER_SERVER = "https://glam2-rest-api.herokuapp.com/api/users"
 
 router.post("/auth", auth, async (req, res) => {
 
-    const pack = {
-        _id: req.user._id,
-        isAdmin: req.user.role === 0 ? false : true,
-        isAuth: true,
-        email: req.user.email,
-        name: req.user.name,
-        lastname: req.user.lastname,
-        role: req.user.role,
-        image: req.user.image,
-        cart: req.user.cart,
-        history: req.user.history
+    let pack
+    if (req.user) {
+        pack = {
+            _id: req.user._id,
+            isAdmin: req.user.role === 0 ? false : true,
+            isAuth: true,
+            email: req.user.email,
+            name: req.user.name,
+            lastname: req.user.lastname,
+            role: req.user.role,
+            image: req.user.image,
+            cart: req.user.cart,
+            history: req.user.history
+        }
+        console.log("Autenticado 2", req.user.email)
+    } else {
+        pack = {
+            isAuth: false,
+            isAdmin: false
+        }
     }
 
-    console.log("Autenticado", req.user.email);
     res.status(200).json(pack)
 })
 
