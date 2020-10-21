@@ -592,6 +592,7 @@ router.post('/google', async (req, res) => {
     if (consulta.sub != googleId) { console.log("Falló verificación"); return res.status(200).json({message:"Falló la verificación por Google", isEmail: true, verif:false}) }
 
     console.log("Coincidencia, verificado")
+
     const userById = await User.findOne({googleId})
 
     if (userById) {
@@ -600,7 +601,7 @@ router.post('/google', async (req, res) => {
 
         return res.status(200).json({
             verif:true, isEmail:true, newUser:false, fusion:false, loginSuccess:true, correo:email,
-            userId:resp._id, token:accessToken
+            token:accessToken
         })
     }
 
