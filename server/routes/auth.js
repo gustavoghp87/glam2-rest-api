@@ -14,7 +14,7 @@ const auth = (req, res, next) => {
     if (user) {
       req.user = user
       console.log("Autenticado", user.email)
-      return next()
+      next()
     } else {
       const pack = {
         isAdmin: false,
