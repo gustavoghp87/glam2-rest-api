@@ -14,13 +14,10 @@ const auth = (req, res, next) => {
     if (user) {
       req.user = user
       console.log("Autenticado 1", user.email)
-      return next()
-    } else {
-      console.log("No autenticado")
+      next()
     }
   })
 
-  return res.status(200).json({isAuth:false, isAdmin:false})
 }
 
 const admin = async (req, res, next) => {
