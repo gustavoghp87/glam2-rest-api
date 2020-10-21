@@ -17,10 +17,8 @@ const auth = (req, res, next) => {
     } else {
       console.log("No autenticado")
     }
-    next()
   })
-
-  //return res.json({isAuth:false, error:true})
+  next()
 }
 
 const admin = async (req, res, next) => {
