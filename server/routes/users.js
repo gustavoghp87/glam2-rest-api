@@ -538,7 +538,6 @@ router.post('/login-with-facebook', async (req, res) => {
 
         console.log("Guardando en db:", fusion)
         console.log("Logueando al usuario nuevo...")
-        let facebookID = json.id
 
         return res.status(200).json({
             verif:true, isEmail:true, newUser:true, fusion:true, loginSuccess: true, correo:email,
@@ -562,8 +561,6 @@ router.post('/login-with-facebook', async (req, res) => {
     let nuevo = await User.create(nuevoUsuario)
     console.log("Guardando en db:", nuevoUsuario)
 
-    let facebookID = json.id
-
     return res.status(200).json({
         verif:true, isEmail:true, newUser:true, fusion:false, loginSuccess: true, correo:email,
         userId:nuevo._id, token:accessToken
@@ -572,7 +569,7 @@ router.post('/login-with-facebook', async (req, res) => {
 })
 
 
-////////////////////////////////////////////////////////////////////////////////////////////////        GOOGLE
+/////////////////////////////////////////////////////////////////////////////        GOOGLE
 
 router.post('/google', async (req, res) => {
     console.log("Recibido en /google:", req.body)
@@ -597,7 +594,7 @@ router.post('/google', async (req, res) => {
     if (consulta.sub != googleId) { console.log("Falló verificación"); return res.status(200).json({message:"Falló la verificación por Google", isEmail: true, verif:false}) }
 
     console.log("Coincidencia, verificado")
-    const userById = await User.findOne({googleId})
+    const userById = await User.findOne({googleID:googleId})
 
     if (userById) {
         console.log("El usuario ya existe, procediendo a loguear")
