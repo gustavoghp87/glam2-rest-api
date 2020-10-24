@@ -20,7 +20,7 @@ const USER_SERVER = "https://glam2-rest-api.herokuapp.com/api/users"
 
 router.post("/auth", auth, async (req, res) => {
 
-    console.log("en /auth,", req.user)
+    console.log("en /auth,", req.user.email)
     let pack
     if (req.user) {
         pack = {
@@ -81,8 +81,9 @@ router.post("/login", async (req, res) => {
 
 
 router.post("/logout", auth, (req, res) => {
+    console.log("Autenticado, procediendo logout");
     User.findOneAndUpdate({_id:req.user._id},
-        {token:"", tokenExp:"", fbAccessToken:"", fbTokenExp:"", glAccessToken:"", glTokenExp:""},
+        {token:"", fbAccessToken:"", glAccessToken:""},
         (err, doc) => {
             if (err) return res.json({ success: false, err })
             console.log("..............................................       Logout exitoso")
@@ -526,7 +527,9 @@ router.post('/login-with-facebook', async (req, res) => {
     }
 
     console.log("Usuario Facebook no existente, comprobando si el email está registrado por otro método...")
+    
     const X = await User.findOne({email})
+
     if (X) {
         console.log("El usuario ya estaba registrado por otro método, procediendo a unificar cuentas")
         const fusion = {
@@ -534,14 +537,14 @@ router.post('/login-with-facebook', async (req, res) => {
             fbAccessToken: accessToken,
         }
 
-        await User.updateOne({email:email}, {$set: fusion})
+        await User.updateOne({email}, {$set: fusion})
 
         console.log("Guardando en db:", fusion)
         console.log("Logueando al usuario nuevo...")
 
         return res.status(200).json({
             verif:true, isEmail:true, newUser:true, fusion:true, loginSuccess: true, correo:email,
-            userId: nuevo._id, token:accessToken
+            token:accessToken
         })
     }
         
@@ -556,12 +559,9 @@ router.post('/login-with-facebook', async (req, res) => {
         fbAccessToken: accessToken,
     })
 
-    let nuevo = await User.create(nuevoUsuario)
-    console.log("Guardando en db:", nuevoUsuario)
-
     return res.status(200).json({
         verif:true, isEmail:true, newUser:true, fusion:false, loginSuccess: true, correo:email,
-        userId:nuevo._id, token:accessToken
+        token:accessToken
     })
 
 })

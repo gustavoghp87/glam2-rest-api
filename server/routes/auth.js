@@ -13,7 +13,7 @@ const auth = (req, res, next) => {
     const user = await findByToken(token)
     if (user) {
       req.user = user
-      console.log("Autenticado 1", user.email)
+      console.log("Autenticado 1,", user.email)
       next()
     }
   })
